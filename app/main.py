@@ -25,6 +25,10 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix="/api/v1")
 
+    @app.get("/", tags=["hello"], summary="Hello")
+    def hello() -> dict[str, str]:
+        return {"message": f"Hello from {settings.app_name}"}
+
     @app.get("/health", tags=["health"], summary="Health check")
     def health() -> dict[str, str]:
         return {"status": "ok", "version": settings.app_version}

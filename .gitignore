@@ -2,3 +2,9 @@ venv/
 .env
 __pycache__/
 *.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+takeaway_*.txt
+linkedin_raw_*.txt
+linkedin_takeaway_*.txt

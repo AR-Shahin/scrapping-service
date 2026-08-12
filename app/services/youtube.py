@@ -3,7 +3,7 @@ from urllib.parse import quote
 
 import httpx
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.exceptions import IpBlocked, NoTranscriptFound, RequestBlocked
+from youtube_transcript_api._errors import IpBlocked, NoTranscriptFound, RequestBlocked
 
 from app.core.config import get_settings
 from app.core.exceptions import AppError

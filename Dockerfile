@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 FROM python:3.11-slim-bookworm AS builder
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -11,7 +9,7 @@ WORKDIR /build
 
 RUN pip install --no-cache-dir pip==25.1
 
-COPY --link requirements.txt ./
+COPY requirements.txt ./
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m venv /opt/venv \
@@ -29,8 +27,8 @@ ENV PATH="/opt/venv/bin:$PATH" \
 
 WORKDIR /app
 
-COPY --from=builder --link /opt/venv /opt/venv
-COPY --from=builder --link /ms-playwright /ms-playwright
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /ms-playwright /ms-playwright
 
 RUN --mount=type=cache,target=/var/cache/apt \
     python -m playwright install-deps chromium-headless-shell \
@@ -38,7 +36,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 RUN useradd --create-home --shell /bin/false appuser
 
-COPY --link --chown=appuser:appuser app ./app
+COPY --chown=appuser:appuser app ./app
 
 USER appuser
 

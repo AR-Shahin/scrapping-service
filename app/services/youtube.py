@@ -2,12 +2,25 @@ from typing import Any
 from urllib.parse import quote
 
 import httpx
-from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api._errors import IpBlocked, NoTranscriptFound, RequestBlocked
+from youtube_transcript_api import YouTubeTranscriptApi, proxies
+from youtube_transcript_api._errors import (
+    IpBlocked,
+    NoTranscriptFound,
+    RequestBlocked,
+    YouTubeRequestFailed,
+)
 
 from app.core.config import get_settings
 from app.core.exceptions import AppError
 from app.utils.validators import parse_youtube_url
+
+
+def _build_api() -> YouTubeTranscriptApi:
+    proxy_url = get_settings().youtube_proxy_url
+    if proxy_url:
+        proxy_config = proxies.GenericProxyConfig(http_url=proxy_url, https_url=proxy_url)
+        return YouTubeTranscriptApi(proxy_config=proxy_config)
+    return YouTubeTranscriptApi()
 
 
 def extract_video_id(url: str) -> str:
@@ -40,13 +53,21 @@ def fetch_transcript(
 ) -> list[dict[str, Any]]:
     preferred = languages or get_settings().youtube_default_languages
     try:
-        fetched = YouTubeTranscriptApi().fetch(video_id, languages=preferred)
+        fetched = _build_api().fetch(video_id, languages=preferred)
     except (IpBlocked, RequestBlocked) as exc:
         raise AppError(
             f"YouTube is blocking requests for video {video_id} from this IP. "
-            "This is common for cloud/datacenter IPs.",
+            "Set YOUTUBE_PROXY_URL to route through a non-blocked proxy.",
             status_code=403,
             code="youtube_ip_blocked",
+        ) from exc
+    except YouTubeRequestFailed as exc:
+        raise AppError(
+            f"YouTube request failed for video {video_id}: {exc.reason}. "
+            "This IP is likely blocked by YouTube; set YOUTUBE_PROXY_URL to "
+            "route through a non-blocked proxy.",
+            status_code=403,
+            code="youtube_request_blocked",
         ) from exc
     except NoTranscriptFound as exc:
         raise AppError(

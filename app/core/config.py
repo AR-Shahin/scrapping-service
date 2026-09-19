@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     browser_navigation_timeout_ms: int = 60000
 
     youtube_default_languages: list[str] = ["en", "bn", "hi"]
+    youtube_proxy_url: str | None = None
 
 
 @lru_cache

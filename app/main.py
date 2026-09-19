@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
 
     @app.get("/health", tags=["health"], summary="Health check")
     def health() -> dict[str, str]:
-        return {"status": "ok", "version": settings.app_version}
+        return {"status": "ok", "version": settings.app_version,"status_code": 200}
 
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
